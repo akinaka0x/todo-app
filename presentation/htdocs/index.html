@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css"
+          integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
+    <title>Todo</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Add a task</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="Item">Title</label>
+                    <input type="text" class="form-control" id="input-ticket-title" placeholder="What do you want to do?">
+                    <small class="form-text text-muted">Enter what you want to procastinate</small>
+                </div>
+                <button class="btn btn-primary" id="submit" onclick="submitNewTicket()">Submit</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">TODO</div>
+            <div id="uncompleted-tickets" class="card-body"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">Completed</div>
+            <div id="completed-tickets" class="card-body"></div>
+        </div>
+    </div>
+
+    <script>
+        appRoot = "http://localhost:8000/app/"
+        async function submitNewTicket() {
+            const title = document.getElementById("input-ticket-title").value;
+            if (title == "") {
+                alert("Title is empty");
+                return;
+            }
+            const url = new URL("ticket", appRoot).toString();
+            const params = {
+                method: "POST",
+                body: JSON.stringify({Title: title})
+            }
+            const response = await fetch(url, params);
+            location.reload();
+            return response;
+        }
+
+        async function showUncompletedTickets() {
+            const table = document.createElement("table");
+            table.id = "uncompleted-tickets-table";
+            table.className = "table table-borderless";
+
+            const tableBody = document.createElement("tableBody");
+            const thead = createTableHead();
+            tableBody.appendChild(thead);
+            table.appendChild(tableBody);
+
+            tickets = await fetchUncompletedTickets();
+            for (ticket of tickets) {
+                tableBody.appendChild(createTableRow(ticket));
+            }
+
+            document.getElementById("uncompleted-tickets").appendChild(table);
+        }
+        async function showCompletedTickets() {
+            const table = document.createElement("table");
+            table.className = "table table-borderless"
+
+            const tableBody = document.createElement("tableBody");
+            const thead = createTableHead();
+            tableBody.appendChild(thead);
+            table.appendChild(tableBody);
+
+            tickets = await fetchCompletedTickets();
+            for (ticket of tickets) {
+                tableBody.appendChild(createTableRow(ticket));
+            }
+
+            document.getElementById("completed-tickets").appendChild(table);
+        }
+
+        async function fetchUncompletedTickets() {
+            const url = new URL("uncompleted-tickets", appRoot).toString();
+            const response = await fetch(url);
+            const tickets = await response.json();
+            return tickets;
+        }
+        async function fetchCompletedTickets() {
+            const url = new URL("completed-tickets", appRoot).toString();
+            const response = await fetch(url);
+            const tickets = await response.json();
+            return tickets;
+        }
+        function createTableHead() {
+            const thead = document.createElement("thead");
+            const tr = document.createElement("tr");
+            tr.insertCell().textContent = "ID";
+            tr.insertCell().textContent = "Title";
+            tr.insertCell().textContent = "Actions";
+            thead.appendChild(tr);
+            return thead;
+        }
+        function createTableRow(ticket) {
+            const tr = document.createElement("tr");
+            tr.insertCell().textContent = ticket.ID;
+            tr.insertCell().textContent = ticket.Title;
+            tr.appendChild(createButtons(ticket));
+            return tr;
+        }
+        function createButtons(ticket) {
+            td = document.createElement("td");
+
+            buttonComplete = document.createElement("button");
+            buttonComplete.textContent = "Complete";
+            buttonComplete.className = "btn btn-primary";
+            buttonComplete.onclick = async function() {
+                await completeTicketOnClick(ticket.ID);
+                location.reload();
+            };
+
+            buttonDelete = document.createElement("button");
+            buttonDelete.textContent = "Delete";
+            buttonDelete.className = "btn btn-danger";
+            buttonDelete.onclick = async function() {
+                await deleteTicketOnClick(ticket.ID);
+                location.reload();
+            };
+
+            td.appendChild(buttonComplete);
+            td.appendChild(buttonDelete);
+            return td;
+        }
+        async function completeTicketOnClick(ticketId) {
+            const url = new URL(`complete-ticket/${encodeURIComponent(ticketId)}`, appRoot).toString();
+            const response = await fetch(url, {method: "PUT"});
+            return response;
+        }
+        async function deleteTicketOnClick(ticketId) {
+            const url = new URL(`ticket/${encodeURIComponent(ticketId)}`, appRoot).toString();
+            const response = await fetch(url, {method: "DELETE"});
+            return response;
+        }
+
+        showUncompletedTickets();
+        showCompletedTickets();
+    </script>
+</body>
+</html>
