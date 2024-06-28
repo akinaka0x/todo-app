@@ -13,7 +13,7 @@
             <div class="card-body">
                 <div class="form-group">
                     <label for="Item">Title</label>
-                    <input type="text" class="form-control" id="input-ticket-title" placeholder="What do you want to do?">
+                    <input type="text" class="form-control" id="new-ticket-title" placeholder="What do you want to do?">
                     <small class="form-text text-muted">Enter what you want to procastinate</small>
                 </div>
                 <button class="btn btn-primary" id="submit" onclick="submitNewTicket()">Submit</button>
@@ -32,7 +32,7 @@
     <script>
         appRoot = "http://localhost:8000/app/"
         async function submitNewTicket() {
-            const title = document.getElementById("input-ticket-title").value;
+            const title = document.getElementById("new-ticket-title").value;
             if (title == "") {
                 alert("Title is empty");
                 return;
