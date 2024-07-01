@@ -1,4 +1,4 @@
-# Simple TODO App for WEB Development Tutorial
+# Simple TODO App for Web Development Tutorial
 
 ## Architecture
 ![architecture](docs/images/architecture.drawio.png)
